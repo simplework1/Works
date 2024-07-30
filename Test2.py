@@ -1,5 +1,5 @@
 from docx import Document
-from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.shared import Pt, RGBColor
 
 # Load the document
 doc_path = '/mnt/data/file-ElcTcoKfxzDZXUuigvU7uX32'
@@ -38,9 +38,14 @@ def add_row_with_format(table, data):
         cell.paragraphs[0].style = original_cell.paragraphs[0].style
         cell.paragraphs[0].alignment = original_cell.paragraphs[0].alignment
         if len(original_cell.paragraphs[0].runs) > 0:
-            cell.paragraphs[0].runs[0].bold = original_cell.paragraphs[0].runs[0].bold
-            cell.paragraphs[0].runs[0].italic = original_cell.paragraphs[0].runs[0].italic
-            cell.paragraphs[0].runs[0].underline = original_cell.paragraphs[0].runs[0].underline
+            original_run = original_cell.paragraphs[0].runs[0]
+            new_run = cell.paragraphs[0].runs[0]
+            new_run.bold = original_run.bold
+            new_run.italic = original_run.italic
+            new_run.underline = original_run.underline
+            new_run.font.size = original_run.font.size
+            new_run.font.color.rgb = original_run.font.color.rgb
+            new_run.font.name = original_run.font.name
 
 # Edit the table details
 for row in table.rows:
