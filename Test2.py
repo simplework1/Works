@@ -1,5 +1,4 @@
 from docx import Document
-from docx.shared import Pt, RGBColor
 
 # Load the document
 doc_path = '/mnt/data/file-ElcTcoKfxzDZXUuigvU7uX32'
@@ -21,12 +20,27 @@ new_rows = [
     ['New Firm 2', 'Alias 2', 'Identifier 2']
 ]
 
+# Function to copy run formatting
+def copy_run_formatting(source_run, target_run):
+    target_run.bold = source_run.bold
+    target_run.italic = source_run.italic
+    target_run.underline = source_run.underline
+    target_run.font.size = source_run.font.size
+    target_run.font.color.rgb = source_run.font.color.rgb
+    target_run.font.name = source_run.font.name
+    target_run.font.highlight_color = source_run.font.highlight_color
+
 # Function to replace text while preserving formatting
 def replace_text_in_cell(cell, new_text):
     for paragraph in cell.paragraphs:
         if paragraph.text.strip() in new_details:
             for run in paragraph.runs:
                 run.text = new_text
+                # Copy formatting from the original run
+                original_cell = next((r for r in table.rows[1].cells if r.text.strip() in new_details), None)
+                if original_cell:
+                    original_run = original_cell.paragraphs[0].runs[0]
+                    copy_run_formatting(original_run, run)
 
 # Function to add new row with the same format as the existing ones
 def add_row_with_format(table, data):
@@ -37,15 +51,11 @@ def add_row_with_format(table, data):
         original_cell = table.rows[1].cells[i]  # Use the second row for format reference
         cell.paragraphs[0].style = original_cell.paragraphs[0].style
         cell.paragraphs[0].alignment = original_cell.paragraphs[0].alignment
+        
         if len(original_cell.paragraphs[0].runs) > 0:
             original_run = original_cell.paragraphs[0].runs[0]
             new_run = cell.paragraphs[0].runs[0]
-            new_run.bold = original_run.bold
-            new_run.italic = original_run.italic
-            new_run.underline = original_run.underline
-            new_run.font.size = original_run.font.size
-            new_run.font.color.rgb = original_run.font.color.rgb
-            new_run.font.name = original_run.font.name
+            copy_run_formatting(original_run, new_run)
 
 # Edit the table details
 for row in table.rows:
