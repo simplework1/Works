@@ -1,9 +1,8 @@
 from docx import Document
-from docx.oxml.ns import qn
-from docx.oxml import OxmlElement
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 # Load the document
-doc_path = '/mnt/data/file-LXtPQWGfJ4BA0m80MAyNJbNk'
+doc_path = '/mnt/data/file-ElcTcoKfxzDZXUuigvU7uX32'
 doc = Document(doc_path)
 
 # Locate the table
@@ -35,10 +34,13 @@ def add_row_with_format(table, data):
     for i, cell in enumerate(new_row.cells):
         cell.text = data[i]
         # Copy formatting from the first row
-        for j, par in enumerate(cell.paragraphs):
-            par.style = table.rows[0].cells[i].paragraphs[0].style
-            if table.rows[0].cells[i].paragraphs[0].alignment:
-                par.alignment = table.rows[0].cells[i].paragraphs[0].alignment
+        original_cell = table.rows[1].cells[i]  # Use the second row for format reference
+        cell.paragraphs[0].style = original_cell.paragraphs[0].style
+        cell.paragraphs[0].alignment = original_cell.paragraphs[0].alignment
+        if len(original_cell.paragraphs[0].runs) > 0:
+            cell.paragraphs[0].runs[0].bold = original_cell.paragraphs[0].runs[0].bold
+            cell.paragraphs[0].runs[0].italic = original_cell.paragraphs[0].runs[0].italic
+            cell.paragraphs[0].runs[0].underline = original_cell.paragraphs[0].runs[0].underline
 
 # Edit the table details
 for row in table.rows:
@@ -52,7 +54,7 @@ for data in new_rows:
     add_row_with_format(table, data)
 
 # Save the document with changes
-output_path = '/mnt/data/updated_document_with_new_rows.docx'
+output_path = '/mnt/data/updated_document_with_new_rows_formatted.docx'
 doc.save(output_path)
 
 print(f"Document saved to {output_path}")
