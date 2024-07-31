@@ -69,7 +69,7 @@ def duplicate_table_within_document(source_table, document):
     return new_table
 
 # Load the existing document to extract the table
-source_doc_path = '/mnt/data/file-WwrlxJTY82VWd14mD5ZRK0Pp'
+source_doc_path = '/mnt/data/file-KiI6iaMqOtkYKkicryHzKgUG'
 doc = Document(source_doc_path)
 source_table = doc.tables[0]
 
