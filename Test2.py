@@ -1,7 +1,7 @@
 from docx import Document
-from docx.shared import Pt, RGBColor
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
+from docx.shared import Pt, RGBColor
 
 # Function to copy cell formatting and shading
 def copy_cell_formatting_and_shading(source_cell, target_cell):
@@ -29,7 +29,8 @@ def copy_cell_formatting_and_shading(source_cell, target_cell):
         target_shading = OxmlElement('w:shd')
         for attr in source_shading[0].attrib:
             target_shading.set(attr, source_shading[0].get(attr))
-        target_cell._element.get_or_add('w:tcPr').append(target_shading)
+        tcPr = target_cell._element.get_or_add_tcPr()
+        tcPr.append(target_shading)
 
 # Function to duplicate a table within the same document
 def duplicate_table_within_document(source_table, document):
@@ -46,7 +47,7 @@ def duplicate_table_within_document(source_table, document):
     return new_table
 
 # Load the existing document to extract the table
-source_doc_path = '/mnt/data/file-lphdteBpEYOmuFerVCifTJdJ'
+source_doc_path = '/mnt/data/file-WwrlxJTY82VWd14mD5ZRK0Pp'
 doc = Document(source_doc_path)
 source_table = doc.tables[0]
 
