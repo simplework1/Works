@@ -3,6 +3,27 @@ from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 from docx.shared import Pt, RGBColor
 
+# Function to set cell margins
+def set_cell_margins(cell, top=0, start=0, bottom=0, end=0):
+    tc = cell._element
+    tcPr = tc.get_or_add_tcPr()
+    
+    # Create or get the existing cell margin element
+    tcMar = tcPr.find(qn('w:tcMar'))
+    if tcMar is None:
+        tcMar = OxmlElement('w:tcMar')
+        tcPr.append(tcMar)
+    
+    # Set the margin attributes
+    for margin, value in (('top', top), ('start', start), ('bottom', bottom), ('end', end)):
+        margin_tag = qn(f'w:{margin}')
+        element = tcMar.find(margin_tag)
+        if element is None:
+            element = OxmlElement(margin_tag)
+            tcMar.append(element)
+        element.set(qn('w:w'), str(value))
+        element.set(qn('w:type'), 'dxa')
+
 # Function to copy cell formatting and shading
 def copy_cell_formatting_and_shading(source_cell, target_cell):
     # Copy text formatting
@@ -43,6 +64,7 @@ def duplicate_table_within_document(source_table, document):
             new_cell = new_table.cell(row_idx, col_idx)
             copy_cell_formatting_and_shading(cell, new_cell)
             new_cell.text = cell.text
+            set_cell_margins(new_cell, top=100, start=100, bottom=100, end=100)  # Add spacing between cells
     
     return new_table
 
@@ -55,7 +77,7 @@ source_table = doc.tables[0]
 duplicate_table_within_document(source_table, doc)
 
 # Save the modified document
-output_path = '/mnt/data/document_with_duplicated_table.docx'
+output_path = '/mnt/data/document_with_duplicated_table_with_spacing.docx'
 doc.save(output_path)
 
 print(f"Document saved to {output_path}")
