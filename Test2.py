@@ -6,7 +6,7 @@ from docx.shared import Pt, RGBColor
 # Function to set cell margins
 def set_cell_margins(cell, top=0, start=0, bottom=0, end=0):
     tc = cell._element
-    tcPr = tc.get_or_add_tcPr()
+    tcPr = tc.get_or_add_tcPr()  # Correct method to get or add tcPr element
     
     # Create or get the existing cell margin element
     tcMar = tcPr.find(qn('w:tcMar'))
