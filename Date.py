@@ -1,12 +1,17 @@
 from datetime import datetime
 
-# Given date string
-date_str = "20240715"
+# Current date and time
+now = datetime.now()
 
-# Convert the string to a datetime object
-date_obj = datetime.strptime(date_str, "%Y%m%d")
+# Format the date and time
+formatted_date = now.strftime("%d{S} %B, %Y %I:%M %p")
 
-# Format the datetime object to the desired format
-formatted_date = date_obj.strftime("%dth %b, %Y")
+# Function to get the appropriate suffix for day of the month
+def get_day_suffix(day):
+    return 'th' if 11<=day<=13 else {1:'st', 2:'nd', 3:'rd'}.get(day%10, 'th')
+
+# Replace placeholder with the correct suffix
+day = now.day
+formatted_date = formatted_date.replace("{S}", get_day_suffix(day))
 
 print(formatted_date)
