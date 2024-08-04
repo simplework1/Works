@@ -1,38 +1,8 @@
-language_codes = [
-    "bn",
-    "te",
-    "mr",
-    "ta",
-    "gu",
-    "kn",
-    "ml",
-    "pa",
-    "or",
-    "ur",
-    "as",
-    "fi",
-    "fr",
-    "de",
-    "it",
-    "ja",
-    "es",
-    "ko",
-    "ro",
-    "sv",
-    "ru",
-    "pl",
-    "hy",
-    "ar",
-    "id",
-    "tr",
-    "no",
-    "el",
-    "pt",
-    "zh",
-    "et",
-    "hu",
-    "he",
-    "nl",
-    "hr",
-    "en"
-]
+# Sample list of strings
+strings_list = ["apple", "banana", "cherry", "date"]
+
+# Convert each string to be enclosed in double quotes
+quoted_list = [f'"{s}"' for s in strings_list]
+
+# Print the list as a string with double quotes
+print(f"[{', '.join(quoted_list)}]")
