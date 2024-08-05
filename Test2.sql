@@ -1,5 +1,13 @@
-INSERT INTO public."user" (
-    userid, username, firstname, lastname, createdOn, createdBy, modifiedOn, modifiedBy, emailID, userType
-) VALUES (
-    '1', 'jdoe', 'John', 'Doe', '2024-08-05 12:00:00', 'admin', '2024-08-05 12:00:00', 'admin', 'jdoe@example.com', 'standard'
+CREATE TABLE public.roles (
+    id UUID PRIMARY KEY,
+    name VARCHAR(255),
+    userfetch BOOLEAN,
+    username VARCHAR(255),
+    taskweek BOOLEAN,
+    taskplan BOOLEAN,
+    taskimport BOOLEAN,
+    searchhistory BOOLEAN,
+    search BOOLEAN,
+    taskselect BOOLEAN,
+    taskedit BOOLEAN
 );
