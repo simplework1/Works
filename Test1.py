@@ -1,23 +1,44 @@
 import asyncio
 from pyppeteer import launch
-import time
 
 async def generate_pdf(html_content, pdf_path):
     browser = await launch(headless=True, executablePath=r"C:\Program Files\Google\Chrome\Application\chrome.exe")
     page = await browser.newPage()
+    
     await page.setContent(html_content)
     
+    # Wait for content to load
+    await page.waitForSelector('body')
+    
+    # Get the height of the rendered content
+    dimensions = await page.evaluate('''() => {
+        return {
+            width: document.documentElement.scrollWidth,
+            height: document.documentElement.scrollHeight,
+            deviceScaleFactor: window.devicePixelRatio
+        }
+    }''')
+    
+    # Set the viewport to the height of the content
+    await page.setViewport({
+        'width': dimensions['width'],
+        'height': dimensions['height'],
+        'deviceScaleFactor': dimensions['deviceScaleFactor']
+    })
+    
+    # Adjust the page.pdf settings to capture the entire scrollable content
     await page.pdf({
         'path': pdf_path,
-        'format': 'A4',
         'printBackground': True,  # Enable background graphics
-        'scale': 1.5,  # Adjust the scale as needed
+        'width': f"{dimensions['width']}px",
+        'height': f"{dimensions['height']}px",
         'margin': {
             'top': '1in',
             'right': '0.5in',
             'bottom': '1in',
             'left': '0.5in'
-        }
+        },
+        'scale': 1  # Adjust the scale as needed
     })
     
     await browser.close()
@@ -31,6 +52,27 @@ html_content = """
 </head>
 <body>
     <h1>This is a sample PDF with margins and background enabled</h1>
+    <p>Content goes here...</p>
+    <p>More content...</p>
+    <p>Even more content...</p>
+    <p>Even more content...</p>
+    <p>Even more content...</p>
+    <p>Even more content...</p>
+    <p>Even more content...</p>
+    <p>Even more content...</p>
+    <p>Even more content...</p>
+    <p>Even more content...</p>
+    <p>Even more content...</p>
+    <p>Even more content...</p>
+    <p>Even more content...</p>
+    <p>Even more content...</p>
+    <p>Even more content...</p>
+    <p>Even more content...</p>
+    <p>Even more content...</p>
+    <p>Even more content...</p>
+    <p>Even more content...</p>
+    <p>Even more content...</p>
+    <p>Even more content...</p>
 </body>
 </html>
 """
