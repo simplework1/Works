@@ -1,7 +1,8 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
+import base64
+import urllib.parse
 
 # Set up Chrome options
 options = Options()
@@ -14,8 +15,25 @@ service = Service('/path/to/chromedriver')  # Update with your path to ChromeDri
 # Initialize the WebDriver
 driver = webdriver.Chrome(service=service, options=options)
 
-# Load the webpage
-driver.get('https://www.example.com')  # Replace with your desired URL
+# Your HTML content as a string
+html_content = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Page</title>
+</head>
+<body>
+    <h1>Hello, World!</h1>
+    <p>This is a test HTML page rendered directly from a string.</p>
+</body>
+</html>
+"""
+
+# Create a data URL for the HTML content
+data_url = 'data:text/html;charset=utf-8,' + urllib.parse.quote(html_content)
+
+# Load the HTML content directly using driver.get()
+driver.get(data_url)
 
 # Define the print to PDF settings
 settings = {
@@ -27,9 +45,12 @@ settings = {
 # Generate the PDF using the DevTools Protocol
 result = driver.execute_cdp_cmd("Page.printToPDF", settings)
 
+# Decode the base64 encoded PDF data
+pdf_data = base64.b64decode(result['data'])
+
 # Save the PDF
 with open("output.pdf", "wb") as f:
-    f.write(bytes(result['data'], encoding='utf-8'))
+    f.write(pdf_data)
 
 # Close the browser
 driver.quit()
