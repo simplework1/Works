@@ -1,48 +1,35 @@
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-import time
+from selenium.webdriver.common.by import By
 
-def generate_pdf_from_html(html_content: str, pdf_path: str, chrome_path: str):
-    # Set up Chrome options
-    chrome_options = Options()
-    chrome_options.add_argument('--headless')  # Run Chrome in headless mode
-    chrome_options.add_argument('--disable-gpu')
-    chrome_options.add_argument('--no-sandbox')
-    chrome_options.add_argument('--print-to-pdf=' + pdf_path)  # Print to PDF
-    
-    # Specify the path to the Chrome executable if needed
-    chrome_options.binary_location = chrome_path
+# Set up Chrome options
+options = Options()
+options.add_argument('--headless')  # Ensure GUI is off
+options.add_argument('--disable-gpu')  # Disable GPU rendering
 
-    # Initialize the WebDriver
-    driver = webdriver.Chrome(options=chrome_options)
+# Set up the ChromeDriver service
+service = Service('/path/to/chromedriver')  # Update with your path to ChromeDriver
 
-    # Create a temporary HTML file to load in the browser
-    with open("temp.html", "w") as file:
-        file.write(html_content)
+# Initialize the WebDriver
+driver = webdriver.Chrome(service=service, options=options)
 
-    # Load the HTML file in the browser
-    driver.get("file://" + os.path.abspath("temp.html"))
+# Load the webpage
+driver.get('https://www.example.com')  # Replace with your desired URL
 
-    # Give the browser time to load content
-    time.sleep(2)
+# Define the print to PDF settings
+settings = {
+    "paperWidth": 8.27,  # A4 paper width in inches
+    "paperHeight": 11.69,  # A4 paper height in inches
+    "printBackground": True  # Prints the background graphics
+}
 
-    # Print the page as a PDF
-    driver.execute_script('window.print();')
+# Generate the PDF using the DevTools Protocol
+result = driver.execute_cdp_cmd("Page.printToPDF", settings)
 
-    # Close the browser
-    driver.quit()
+# Save the PDF
+with open("output.pdf", "wb") as f:
+    f.write(bytes(result['data'], encoding='utf-8'))
 
-# Example usage
-html_content = """
-<html>
-<body>
-    <h1>Hello, World!</h1>
-    <p>This is a PDF generated from HTML content using Selenium.</p>
-</body>
-</html>
-"""
-
-pdf_path = "output.pdf"
-chrome_path = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"  # Update this path if necessary
-
-generate_pdf_from_html(html_content, pdf_path, chrome_path)
+# Close the browser
+driver.quit()
