@@ -1,15 +1,20 @@
 import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
-# Your asynchronous code here
 async def my_async_function():
-    print("Hello, World!")
+    print("Hello from async function!")
 
-# This code is outside of the main function
-try:
-    loop = asyncio.get_running_loop()
-except RuntimeError:  # No event loop currently running
+def start_async_task():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
+    loop.run_until_complete(my_async_function())
+    loop.close()
 
-# Now run the asynchronous function
-loop.run_until_complete(my_async_function())
+def main():
+    with ThreadPoolExecutor() as executor:
+        # Run the async function in a separate thread
+        loop = asyncio.get_event_loop()
+        loop.run_in_executor(executor, start_async_task)
+
+if __name__ == "__main__":
+    main()
