@@ -1,8 +1,7 @@
 import pdfplumber
 from docx import Document
-from docx.shared import Pt
 from docx.oxml import OxmlElement
-from docx.oxml.ns import nsdecls
+from docx.oxml.ns import qn
 
 # Function to set table grid (borders)
 def set_table_borders(table):
@@ -11,12 +10,14 @@ def set_table_borders(table):
 
     # Create a table border element
     tblBorders = OxmlElement('w:tblBorders')
+    
+    # Define border styles
     for border_name in ["top", "left", "bottom", "right", "insideH", "insideV"]:
         border = OxmlElement(f'w:{border_name}')
-        border.set('w:val', 'single')
-        border.set('w:sz', '4')  # Border size (can adjust as needed)
-        border.set('w:space', '0')
-        border.set('w:color', '000000')  # Black color for the borders
+        border.set(qn('w:val'), 'single')
+        border.set(qn('w:sz'), '4')  # Border size (can adjust as needed)
+        border.set(qn('w:space'), '0')
+        border.set(qn('w:color'), '000000')  # Black color for the borders
         tblBorders.append(border)
 
     tblPr.append(tblBorders)  # Add the border element to table properties
@@ -61,8 +62,8 @@ def pdf_table_to_docx(pdf_file_path, docx_file_path):
         doc.save(docx_file_path)
 
 # Paths to the input PDF and output DOCX
-pdf_file_path = "/mnt/data/file-9dogRF3PTZ5f3bxbnvf4DDfQ"
-docx_file_path = "/mnt/data/output_with_grid.docx"
+pdf_file_path = "/mnt/data/file-WzpWp2iTTDThuK1LKIoYkyBm"
+docx_file_path = "/mnt/data/output_with_grid_fixed.docx"
 
 # Convert PDF tables to DOCX with table grid
 pdf_table_to_docx(pdf_file_path, docx_file_path)
