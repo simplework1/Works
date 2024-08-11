@@ -1,56 +1,43 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-import base64
-import urllib.parse
+from docx import Document
+import os
 
-# Set up Chrome options
-options = Options()
-options.add_argument('--headless')  # Ensure GUI is off
-options.add_argument('--disable-gpu')  # Disable GPU rendering
+# Function to merge docx files
+def merge_docx(files, output):
+    merged_document = Document()
 
-# Set up the ChromeDriver service
-service = Service('/path/to/chromedriver')  # Update with your path to ChromeDriver
+    for index, file in enumerate(files):
+        sub_doc = Document(file)
+        
+        # Skip the first paragraph of all documents except the first one to avoid extra blank lines
+        if index != 0:
+            sub_doc_paragraphs = sub_doc.paragraphs[1:]
+        else:
+            sub_doc_paragraphs = sub_doc.paragraphs
 
-# Initialize the WebDriver
-driver = webdriver.Chrome(service=service, options=options)
+        for paragraph in sub_doc_paragraphs:
+            # Add the content of each file
+            merged_document.add_paragraph(paragraph.text)
 
-# Your HTML content as a string
-html_content = """
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Test Page</title>
-</head>
-<body>
-    <h1>Hello, World!</h1>
-    <p>This is a test HTML page rendered directly from a string.</p>
-</body>
-</html>
-"""
+        # Add a page break after each document except the last one
+        if index < len(files) - 1:
+            merged_document.add_page_break()
 
-# Create a data URL for the HTML content
-data_url = 'data:text/html;charset=utf-8,' + urllib.parse.quote(html_content)
+    # Save the merged document
+    merged_document.save(output)
 
-# Load the HTML content directly using driver.get()
-driver.get(data_url)
+# Directory containing the .docx files
+directory = 'path_to_directory'
 
-# Define the print to PDF settings
-settings = {
-    "paperWidth": 8.27,  # A4 paper width in inches
-    "paperHeight": 11.69,  # A4 paper height in inches
-    "printBackground": True  # Prints the background graphics
-}
+# List all .docx files in the directory
+files = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.docx')]
 
-# Generate the PDF using the DevTools Protocol
-result = driver.execute_cdp_cmd("Page.printToPDF", settings)
+# Sort the files by name (optional, in case you want them in a specific order)
+files.sort()
 
-# Decode the base64 encoded PDF data
-pdf_data = base64.b64decode(result['data'])
+# Output file name
+output_file = 'merged_document.docx'
 
-# Save the PDF
-with open("output.pdf", "wb") as f:
-    f.write(pdf_data)
+# Merge the documents
+merge_docx(files, output_file)
 
-# Close the browser
-driver.quit()
+print(f'Merged {len(files)} documents into {output_file}')
