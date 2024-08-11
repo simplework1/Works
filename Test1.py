@@ -1,43 +1,32 @@
-from docx import Document
 import os
+from PyPDF2 import PdfReader, PdfWriter
 
-# Function to merge docx files
-def merge_docx(files, output):
-    merged_document = Document()
-
-    for index, file in enumerate(files):
-        sub_doc = Document(file)
+def split_pdf(input_pdf_path, output_dir):
+    # Ensure the output directory exists
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    
+    # Read the input PDF
+    with open(input_pdf_path, 'rb') as pdf_file:
+        pdf_reader = PdfReader(pdf_file)
+        num_pages = len(pdf_reader.pages)
         
-        # Skip the first paragraph of all documents except the first one to avoid extra blank lines
-        if index != 0:
-            sub_doc_paragraphs = sub_doc.paragraphs[1:]
-        else:
-            sub_doc_paragraphs = sub_doc.paragraphs
+        # Iterate through each page and save it as a separate PDF
+        for page_num in range(num_pages):
+            pdf_writer = PdfWriter()
+            pdf_writer.add_page(pdf_reader.pages[page_num])
+            
+            # Construct the output PDF file path
+            output_pdf_path = os.path.join(output_dir, f"page_{page_num + 1}.pdf")
+            
+            # Write the page to the output PDF
+            with open(output_pdf_path, 'wb') as output_pdf_file:
+                pdf_writer.write(output_pdf_file)
+                
+            print(f"Saved: {output_pdf_path}")
 
-        for paragraph in sub_doc_paragraphs:
-            # Add the content of each file
-            merged_document.add_paragraph(paragraph.text)
+# Example usage
+input_pdf_path = 'path/to/your/input.pdf'
+output_dir = 'path/to/your/output/directory'
 
-        # Add a page break after each document except the last one
-        if index < len(files) - 1:
-            merged_document.add_page_break()
-
-    # Save the merged document
-    merged_document.save(output)
-
-# Directory containing the .docx files
-directory = 'path_to_directory'
-
-# List all .docx files in the directory
-files = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.docx')]
-
-# Sort the files by name (optional, in case you want them in a specific order)
-files.sort()
-
-# Output file name
-output_file = 'merged_document.docx'
-
-# Merge the documents
-merge_docx(files, output_file)
-
-print(f'Merged {len(files)} documents into {output_file}')
+split_pdf(input_pdf_path, output_dir)
