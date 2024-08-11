@@ -1,31 +1,41 @@
-import os
+import pdfplumber
 from docx import Document
-from docxcompose.composer import Composer
+from docx.table import Table
 
-def merge_docx_files(docx_dir, output_docx_path):
-    # Get all docx files in the directory
-    docx_files = [f for f in os.listdir(docx_dir) if f.endswith('.docx')]
-    docx_files.sort()  # Optional: Sort files if you want to merge them in a specific order
-    
-    # Initialize the master document
-    if not docx_files:
-        print("No DOCX files found in the directory.")
-        return
-    
-    master = Document(os.path.join(docx_dir, docx_files[0]))
-    composer = Composer(master)
-    
-    # Iterate through the remaining docx files and append them to the master document
-    for docx_file in docx_files[1:]:
-        doc = Document(os.path.join(docx_dir, docx_file))
-        composer.append(doc)
-    
-    # Save the merged document
-    composer.save(output_docx_path)
-    print(f"All DOCX files have been merged into {output_docx_path}")
+def pdf_table_to_docx(pdf_file_path, docx_file_path):
+    # Open the PDF file
+    with pdfplumber.open(pdf_file_path) as pdf:
+        # Create a new Document
+        doc = Document()
 
-# Example usage
-docx_dir = '/path/to/docx/output/directory'  # Replace with the directory containing your DOCX files
-output_docx_path = '/path/to/save/final/output.docx'  # Replace with the path where you want to save the final DOCX
+        for i, page in enumerate(pdf.pages):
+            # Extract tables from the page
+            tables = page.extract_tables()
 
-merge_docx_files(docx_dir, output_docx_path)
+            if tables:
+                for table in tables:
+                    doc.add_paragraph(f"Table from Page {i + 1}")
+                    doc_table = doc.add_table(rows=1, cols=len(table[0]))
+
+                    # Add header row
+                    hdr_cells = doc_table.rows[0].cells
+                    for j, cell_value in enumerate(table[0]):
+                        hdr_cells[j].text = str(cell_value)
+
+                    # Add the rest of the rows
+                    for row_data in table[1:]:
+                        row_cells = doc_table.add_row().cells
+                        for j, cell_value in enumerate(row_data):
+                            row_cells[j].text = str(cell_value)
+
+            doc.add_page_break()
+
+        # Save the DOCX file
+        doc.save(docx_file_path)
+
+# Paths to the input PDF and output DOCX
+pdf_file_path = "path_to_your_pdf.pdf"
+docx_file_path = "output.docx"
+
+# Convert PDF tables to DOCX
+pdf_table_to_docx(pdf_file_path, docx_file_path)
