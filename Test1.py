@@ -1,41 +1,30 @@
-from bs4 import BeautifulSoup
+from docx import Document
 
-# Function to parse the table and store rows as a list of lists
-def parse_html_table(html_file_path):
-    with open(html_file_path, 'r', encoding='utf-8') as file:
-        soup = BeautifulSoup(file, 'html.parser')
-    
-    # Locate the table under the "Sanctions" heading
-    table = soup.find('h3', text="Sanctions").find_next('table')
-    
-    # Initialize list to store rows
-    table_data = []
+# Load the DOCX file
+doc = Document("your_document.docx")
 
-    # Iterate over each row in the table body
-    for row in table.find_all('tr'):
-        row_data = []
-        # Iterate over each cell in the row
-        for cell in row.find_all(['td', 'th']):
-            # Check if the cell has multiple lines (e.g., <ul><li>...</li></ul>)
-            if cell.find('ul'):
-                # Extract the list items and store them as a nested list
-                multiline_data = [li.get_text(strip=True) for li in cell.find_all('li')]
-                row_data.append(multiline_data)
-            else:
-                # Otherwise, just get the text content
-                row_data.append(cell.get_text(strip=True))
-        
-        # Append the row data to the table data list
-        table_data.append(row_data)
+# Variables to track the start and end of the range
+in_sanctions_section = False
+tables_to_delete = []
 
-    return table_data
+# Loop through all elements in the document
+for i, element in enumerate(doc.element.body):
+    # Check if the element is a paragraph with the style 'Heading 1', 'Heading 2', etc.
+    if hasattr(element, 'text'):
+        paragraph = doc.paragraphs[i]
+        if paragraph.style.name.startswith('Heading'):
+            if 'Sanctions' in paragraph.text:
+                in_sanctions_section = True  # Start tracking
+            elif 'Adverse Press' in paragraph.text:
+                in_sanctions_section = False  # Stop tracking
 
-# Path to your HTML file
-html_file_path = "/mnt/data/file-2G2fOAW3oJ8yAjW42RUYAzHJ"
+    # If in the Sanctions section and the element is a table, mark it for deletion
+    if in_sanctions_section and element.tag.endswith('tbl'):
+        tables_to_delete.append(element)
 
-# Parse the table and store the data
-table_data = parse_html_table(html_file_path)
+# Remove the tables marked for deletion
+for table in tables_to_delete:
+    doc.element.body.remove(table)
 
-# Output the parsed data
-for row in table_data:
-    print(row)
+# Save the modified document
+doc.save("modified_document.docx")
