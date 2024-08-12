@@ -1,27 +1,21 @@
 from docx import Document
+from docx.shared import Inches
+from docx.oxml.ns import qn
+from docx.oxml import OxmlElement
 
 # Load the DOCX file
 doc = Document("/mnt/data/file-5W8eQY6g2eRPjh0ZayYgiIpj")
 
-# Variables to track the start and end of the range
-in_sanctions_section = False
-elements_to_delete = []
+# Set the page size to A4 (21cm x 29.7cm)
+section = doc.sections[0]
+section.page_width = Inches(8.27)
+section.page_height = Inches(11.69)
 
-# Iterate over the document elements directly
-for para in doc.paragraphs:
-    # Check if the paragraph contains the "Sanctions" heading
-    if 'Sanctions' in para.text:
-        in_sanctions_section = True
-    elif 'Adverse Press' in para.text:
-        in_sanctions_section = False
-
-    # Mark elements for deletion after "Sanctions" and before "Adverse Press"
-    if in_sanctions_section:
-        elements_to_delete.append(para)
-
-# Remove the marked elements
-for element in elements_to_delete:
-    element._element.getparent().remove(element._element)
+# Optional: Set the margins if needed
+section.top_margin = Inches(1)
+section.bottom_margin = Inches(1)
+section.left_margin = Inches(1)
+section.right_margin = Inches(1)
 
 # Save the modified document
-doc.save("modified_document_after_sanctions.docx")
+doc.save("document_set_to_A4.docx")
