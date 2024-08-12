@@ -1,6 +1,4 @@
 from docx import Document
-from docx.oxml.ns import nsdecls
-from docx.oxml import parse_xml
 from docx.shared import Pt
 
 # Load the DOCX file
@@ -8,7 +6,6 @@ doc = Document("/mnt/data/file-hi8SbR8eCb763w48a73Sdt4R")
 
 # Your table data
 table_data = [
-    # Example data
     ['aliases', 'dob', 'name', 'otherInfo', 'sanctions', 'source'],
     [["A.K.A. KHORASAN SPACE AGENCY", "A.K.A. NPFWD"], '10/12/1985', 'Name Example', 'Other Info Example', ["IFSR", "NPWMD"], 'OFAC'],
     # Add more rows as needed
@@ -22,11 +19,11 @@ for para in doc.paragraphs:
         break
 
 if sanctions_paragraph:
-    # Insert a new table after the "Sanctions" heading
-    table = doc.add_table(rows=1, cols=len(table_data[0]))
-    hdr_cells = table.rows[0].cells
+    # Insert a new table with the correct number of rows and columns
+    table = doc.add_table(rows=0, cols=len(table_data[0]))
 
-    # Fill in the header row
+    # Add the header row
+    hdr_cells = table.add_row().cells
     for i, hdr_text in enumerate(table_data[0]):
         hdr_cells[i].text = hdr_text
 
@@ -36,17 +33,20 @@ if sanctions_paragraph:
         for i, cell_data in enumerate(row_data):
             if isinstance(cell_data, list):
                 # Handle multiline cells
-                row_cells[i].text = '\n'.join(cell_data)
+                cell_text = '\n'.join(cell_data)
             else:
-                row_cells[i].text = str(cell_data)
-    
-    # Apply formatting to make multiline cells render correctly
-    for row in table.rows:
-        for cell in row.cells:
-            for paragraph in cell.paragraphs:
+                cell_text = str(cell_data)
+            row_cells[i].text = cell_text
+
+            # Apply some basic formatting
+            for paragraph in row_cells[i].paragraphs:
                 paragraph.style = doc.styles['Normal']
                 paragraph_format = paragraph.paragraph_format
                 paragraph_format.space_after = Pt(0)
+
+    # Move the table to be right after the "Sanctions" paragraph
+    sanctions_paragraph._element.addnext(table._element)
+
 else:
     print("Sanctions heading not found in the document.")
 
