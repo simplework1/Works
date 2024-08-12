@@ -25,6 +25,13 @@ def add_table_to_doc(doc, table_data):
             table.cell(i, j).text = cell
     # Add styling and formatting if necessary
 
+def extract_font_color(char):
+    """Extract the font color from an LTChar object."""
+    color = char.graphicstate.ncs
+    if isinstance(color, tuple) and len(color) >= 3:
+        return RGBColor(int(color[0] * 255), int(color[1] * 255), int(color[2] * 255))
+    return None
+
 # Path to your PDF
 pdf_path = "your_pdf_file.pdf"
 
@@ -58,10 +65,9 @@ for page_layout in extract_pages(pdf_path):
                                     run.bold = True
                                 if 'Italic' in char.fontname:
                                     run.italic = True
-                                color = char.ncs.fill
+                                color = extract_font_color(char)
                                 if color:
-                                    run.font.color.rgb = RGBColor(
-                                        int(color[0] * 255), int(color[1] * 255), int(color[2] * 255))
+                                    run.font.color.rgb = color
                         if line.get_x() > 100:
                             paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
                         elif line.get_x() < 100:
