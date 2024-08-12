@@ -1,15 +1,28 @@
 from docx import Document
-from docx.shared import Inches
+from docx.shared import Pt
 
-# Load the DOCX file
-doc = Document("/mnt/data/file-5W8eQY6g2eRPjh0ZayYgiIpj")
+def clean_document(doc):
+    # Set table.autofit = False for all tables in the document
+    for table in doc.tables:
+        table.autofit = False
 
-# Define margins for the entire document
-for section in doc.sections:
-    section.top_margin = Inches(1)
-    section.bottom_margin = Inches(1)
-    section.left_margin = Inches(1)
-    section.right_margin = Inches(1)
+    # Remove extra blank paragraphs or unnecessary blank spaces
+    def remove_empty_paragraphs(doc):
+        for para in doc.paragraphs:
+            # Check if the paragraph is empty or consists only of whitespace
+            if not para.text.strip():
+                # Remove the paragraph by clearing its content
+                para.clear()
 
-# Save the modified document
-doc.save("document_with_set_margins.docx")
+    # First, remove empty paragraphs
+    remove_empty_paragraphs(doc)
+
+    # Save the cleaned document (optional: if you want to overwrite the original doc)
+    # doc.save('cleaned_document.docx')
+
+    return doc
+
+# Example usage
+doc = Document('your_document.docx')
+cleaned_doc = clean_document(doc)
+cleaned_doc.save('cleaned_document.docx')
