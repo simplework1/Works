@@ -1,8 +1,9 @@
 from docx import Document
 from docx.shared import Pt
+from docx.oxml import OxmlElement
 
 # Load the DOCX file
-doc = Document("/mnt/data/file-hi8SbR8eCb763w48a73Sdt4R")
+doc = Document("/mnt/data/file-zgYvHY4ZFRrxiBjGKELheKtr")
 
 # Your table data
 table_data = [
@@ -44,6 +45,21 @@ if sanctions_paragraph:
                 paragraph_format = paragraph.paragraph_format
                 paragraph_format.space_after = Pt(0)
 
+    # Apply borders to all cells
+    for row in table.rows:
+        for cell in row.cells:
+            tc = cell._element
+            tcPr = tc.get_or_add_tcPr()
+            tcBorders = OxmlElement('w:tcBorders')
+            for border in ['top', 'left', 'bottom', 'right']:
+                border_element = OxmlElement(f'w:{border}')
+                border_element.set('w:val', 'single')
+                border_element.set('w:sz', '4')  # Border size
+                border_element.set('w:space', '0')
+                border_element.set('w:color', 'auto')
+                tcBorders.append(border_element)
+            tcPr.append(tcBorders)
+
     # Move the table to be right after the "Sanctions" paragraph
     sanctions_paragraph._element.addnext(table._element)
 
@@ -51,4 +67,4 @@ else:
     print("Sanctions heading not found in the document.")
 
 # Save the modified document
-doc.save("modified_document_with_table.docx")
+doc.save("modified_document_with_table_with_borders.docx")
