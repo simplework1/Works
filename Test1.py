@@ -4,8 +4,13 @@ from PyPDF2 import PdfMerger
 # Directory containing your PDF files
 pdf_directory = '/path/to/your/pdfs'
 
-# Get a list of PDF files in the directory, sorted by filename (assuming filenames are numbered 1, 2, 3, ...)
-pdf_files = sorted([f for f in os.listdir(pdf_directory) if f.endswith('.pdf')])
+# Helper function to extract numeric value from filename
+def extract_number(filename):
+    # Assuming the filename starts with the number (e.g., "1.pdf", "11.pdf")
+    return int(''.join(filter(str.isdigit, filename)))
+
+# Get a list of PDF files in the directory, sorted numerically by the number in the filename
+pdf_files = sorted([f for f in os.listdir(pdf_directory) if f.endswith('.pdf')], key=extract_number)
 
 # Initialize PdfMerger
 merger = PdfMerger()
