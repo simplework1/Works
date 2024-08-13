@@ -1,6 +1,6 @@
 import docx
 from html4docx import HtmlToDocx
-from docx.shared import Pt, Inches
+from docx.shared import Pt
 
 # Your HTML content as a string
 html_content = '''
@@ -41,21 +41,17 @@ for paragraph in doc.paragraphs:
     for run in paragraph.runs:
         run.font.size = Pt(10)  # Reduce the font size to 10 points
 
-# Adjust table cell sizes and remove unnecessary spaces
+# Adjust table cell sizes, remove unnecessary spaces, and reduce font size
 for table in doc.tables:
-    # Set uniform column widths (e.g., 2 inches for each column)
-    num_columns = len(table.columns)
     for row in table.rows:
         for cell in row.cells:
-            cell.width = Inches(2 / num_columns)  # Adjust column width equally
             for paragraph in cell.paragraphs:
                 for run in paragraph.runs:
-                    run.font.size = Pt(8)  # Reduce the font size to 8 points
-                # Remove extra spaces
-                paragraph.text = paragraph.text.strip()
+                    run.font.size = Pt(8)  # Reduce the font size to 8 points for table content
+                paragraph.text = paragraph.text.strip()  # Remove extra spaces
 
 # Save the generated DOCX file
-output_file = "output_single_page_aligned_table.docx"
+output_file = "output_auto_aligned_with_small_table_content.docx"
 doc.save(output_file)
 
 print(f"Document saved as {output_file}")
