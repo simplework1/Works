@@ -1,57 +1,30 @@
-import docx
-from html4docx import HtmlToDocx
-from docx.shared import Pt
+import os
+from docx import Document
+from docxcompose.composer import Composer
 
-# Your HTML content as a string
-html_content = '''
-<html>
-<head><title>Sample HTML</title></head>
-<body>
-    <h1>This is a heading</h1>
-    <p>This is a paragraph.</p>
-    <table border="1">
-        <tr>
-            <th>Header 1</th>
-            <th>Header 2</th>
-        </tr>
-        <tr>
-            <td>Row 1, Cell 1</td>
-            <td>Row 1, Cell 2</td>
-        </tr>
-        <tr>
-            <td>Row 2, Cell 1</td>
-            <td>Row 2, Cell 2</td>
-        </tr>
-    </table>
-</body>
-</html>
-'''
+# Directory where your Word files are stored
+directory = "/path/to/your/word/files"
 
-# Create a new Word Document
-doc = docx.Document()
+# Get a list of all Word files in the directory
+files = [f for f in os.listdir(directory) if f.endswith('.docx')]
 
-# Initialize HtmlToDocx converter
-html_to_docx = HtmlToDocx()
+# Sort the files by their numerical order
+files.sort(key=lambda x: int(os.path.splitext(x)[0]))
 
-# Convert HTML content to DOCX and add it to the document
-html_to_docx.add_html_to_document(html_content, doc)
+# Create a new Document to start merging
+merged_doc = Document()
 
-# Reduce the font size for all paragraphs
-for paragraph in doc.paragraphs:
-    for run in paragraph.runs:
-        run.font.size = Pt(10)  # Reduce the font size to 10 points
+# Initialize Composer with the base document
+composer = Composer(merged_doc)
 
-# Adjust table cell sizes, remove unnecessary spaces, and reduce font size
-for table in doc.tables:
-    for row in table.rows:
-        for cell in row.cells:
-            for paragraph in cell.paragraphs:
-                for run in paragraph.runs:
-                    run.font.size = Pt(8)  # Reduce the font size to 8 points for table content
-                paragraph.text = paragraph.text.strip()  # Remove extra spaces
+# Loop through each file and append its content to the merged document
+for file in files:
+    file_path = os.path.join(directory, file)
+    sub_doc = Document(file_path)
+    composer.append(sub_doc)
 
-# Save the generated DOCX file
-output_file = "output_auto_aligned_with_small_table_content.docx"
-doc.save(output_file)
+# Save the merged document
+output_path = os.path.join(directory, "merged_document.docx")
+composer.save(output_path)
 
-print(f"Document saved as {output_file}")
+print("All documents have been merged successfully.")
