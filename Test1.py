@@ -1,29 +1,42 @@
-import os
-import win32com.client
+import docx
+from html4docx import HtmlToDocx
 
-# Paths for the input PDF and output Word document
-pdf_path = r"C:\path\to\your\input.pdf"
-docx_path = r"C:\path\to\your\output.docx"
+# Your HTML content as a string
+html_content = '''
+<html>
+<head><title>Sample HTML</title></head>
+<body>
+    <h1>This is a heading</h1>
+    <p>This is a paragraph.</p>
+    <table border="1">
+        <tr>
+            <th>Header 1</th>
+            <th>Header 2</th>
+        </tr>
+        <tr>
+            <td>Row 1, Cell 1</td>
+            <td>Row 1, Cell 2</td>
+        </tr>
+        <tr>
+            <td>Row 2, Cell 1</td>
+            <td>Row 2, Cell 2</td>
+        </tr>
+    </table>
+</body>
+</html>
+'''
 
-# Ensure the output directory exists
-output_dir = os.path.dirname(docx_path)
-if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
+# Create a new Word Document
+doc = docx.Document()
 
-# Create an instance of Word application
-word = win32com.client.Dispatch("Word.Application")
+# Initialize HtmlToDocx converter
+html_to_docx = HtmlToDocx()
 
-# Set to False to make Word visible during the operation (for debugging)
-word.Visible = False
+# Convert HTML content to DOCX and add it to the document
+html_to_docx.add_html_to_document(html_content, doc)
 
-# Open the PDF file in Word
-doc = word.Documents.Open(pdf_path)
+# Save the generated DOCX file
+output_file = "output.docx"
+doc.save(output_file)
 
-# Save the opened PDF as a Word document
-doc.SaveAs(docx_path, FileFormat=16)  # 16 corresponds to the wdFormatDocumentDefault (docx format)
-
-# Close the document and Word application
-doc.Close()
-word.Quit()
-
-print(f"PDF converted to Word document and saved as '{docx_path}'")
+print(f"Document saved as {output_file}")
