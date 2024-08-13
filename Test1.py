@@ -1,28 +1,29 @@
 import os
-from PyPDF2 import PdfMerger
+import win32com.client
 
-# Directory containing your PDF files
-pdf_directory = '/path/to/your/pdfs'
+# Paths for the input PDF and output Word document
+pdf_path = r"C:\path\to\your\input.pdf"
+docx_path = r"C:\path\to\your\output.docx"
 
-# Helper function to extract numeric value from filename
-def extract_number(filename):
-    # Assuming the filename starts with the number (e.g., "1.pdf", "11.pdf")
-    return int(''.join(filter(str.isdigit, filename)))
+# Ensure the output directory exists
+output_dir = os.path.dirname(docx_path)
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
 
-# Get a list of PDF files in the directory, sorted numerically by the number in the filename
-pdf_files = sorted([f for f in os.listdir(pdf_directory) if f.endswith('.pdf')], key=extract_number)
+# Create an instance of Word application
+word = win32com.client.Dispatch("Word.Application")
 
-# Initialize PdfMerger
-merger = PdfMerger()
+# Set to False to make Word visible during the operation (for debugging)
+word.Visible = False
 
-# Loop through all the PDF files and append them to the merger
-for pdf_file in pdf_files:
-    pdf_path = os.path.join(pdf_directory, pdf_file)
-    merger.append(pdf_path)
+# Open the PDF file in Word
+doc = word.Documents.Open(pdf_path)
 
-# Write out the combined PDF
-output_path = os.path.join(pdf_directory, 'combined.pdf')
-merger.write(output_path)
-merger.close()
+# Save the opened PDF as a Word document
+doc.SaveAs(docx_path, FileFormat=16)  # 16 corresponds to the wdFormatDocumentDefault (docx format)
 
-print(f"Combined PDF saved to {output_path}")
+# Close the document and Word application
+doc.Close()
+word.Quit()
+
+print(f"PDF converted to Word document and saved as '{docx_path}'")
