@@ -1,36 +1,35 @@
 from docx import Document
-from docx.shared import Pt
+from docx.oxml.ns import qn
+from docx.oxml import OxmlElement
 
-def is_blank_paragraph(paragraph):
-    """
-    Check if a paragraph is effectively blank.
-    """
-    if not paragraph.text.strip() and not paragraph.runs:
-        return True
-    if all(run.text.strip() == '' for run in paragraph.runs):
-        return True
-    return False
+def insert_section_break(document):
+    # Insert a section break to start a new section
+    sectPr = document.sections[-1]._sectPr  # get the last section
+    pgMar = OxmlElement('w:sectPr')
+    pgMar.set(qn('w:type'), 'nextPage')
+    sectPr.append(pgMar)
 
-def remove_blank_pages(doc):
-    """
-    Remove paragraphs that might be causing blank pages.
-    """
-    # Identify and remove blank paragraphs
-    for para in doc.paragraphs:
-        if is_blank_paragraph(para):
-            p = para._element
-            p.getparent().remove(p)
+def merge_documents(doc1_path, doc2_path, output_path):
+    # Load the first document
+    doc1 = Document(doc1_path)
+
+    # Insert a section break to start the second document on a new section
+    insert_section_break(doc1)
+
+    # Load the second document
+    doc2 = Document(doc2_path)
+
+    # Append each paragraph and its elements to the first document
+    for element in doc2.element.body:
+        doc1.element.body.append(element)
     
-    # You can add more logic here if you identify other causes of blank pages, 
-    # such as manual page breaks or section breaks.
-    
-    return doc
+    # Save the merged document
+    doc1.save(output_path)
 
-# Load your document
-doc = Document('input_document.docx')
+# File paths
+doc1_path = 'first_document.docx'
+doc2_path = 'second_document.docx'
+output_path = 'merged_document.docx'
 
-# Remove blank pages
-doc = remove_blank_pages(doc)
-
-# Save the cleaned document
-doc.save('cleaned_document.docx')
+# Merge the documents
+merge_documents(doc1_path, doc2_path, output_path)
