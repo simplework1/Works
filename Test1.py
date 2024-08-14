@@ -1,19 +1,36 @@
 from docx import Document
-from docx.shared import Cm
-from docx.enum.table import WD_ROW_HEIGHT_RULE
+from docx.shared import Pt
 
-# Load the existing document
-doc = Document('input.docx')  # Replace with your document's path
+def is_blank_paragraph(paragraph):
+    """
+    Check if a paragraph is effectively blank.
+    """
+    if not paragraph.text.strip() and not paragraph.runs:
+        return True
+    if all(run.text.strip() == '' for run in paragraph.runs):
+        return True
+    return False
 
-# Define the desired row height (e.g., 2 centimeters)
-desired_height = Cm(2)
+def remove_blank_pages(doc):
+    """
+    Remove paragraphs that might be causing blank pages.
+    """
+    # Identify and remove blank paragraphs
+    for para in doc.paragraphs:
+        if is_blank_paragraph(para):
+            p = para._element
+            p.getparent().remove(p)
+    
+    # You can add more logic here if you identify other causes of blank pages, 
+    # such as manual page breaks or section breaks.
+    
+    return doc
 
-# Iterate through all tables in the document
-for table in doc.tables:
-    for row in table.rows:
-        # Set the row height
-        row.height = desired_height
-        row.height_rule = WD_ROW_HEIGHT_RULE.EXACTLY
+# Load your document
+doc = Document('input_document.docx')
 
-# Save the modified document
-doc.save('output.docx')  # Replace with your desired output path
+# Remove blank pages
+doc = remove_blank_pages(doc)
+
+# Save the cleaned document
+doc.save('cleaned_document.docx')
